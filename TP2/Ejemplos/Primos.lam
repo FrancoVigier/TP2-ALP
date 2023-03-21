@@ -1,0 +1,99 @@
+
+-- not: (!)
+def not = (\x . x false true)
+
+-- isEqual: (==)
+def isEqual = 
+(Y (\isEqual x y . 
+  (and (is0 x) (is0 y)) 
+  true 
+  (
+    (
+      or 
+      (and (is0 x) (not (is0 y))) 
+      (and (not (is0 x)) (is0 y))
+    )
+    false 
+    (
+      isEqual
+      (pred x) 
+      (pred y)
+    )
+  )
+))
+
+-- isGreaterEqual: (>=)
+def isGreaterEqual = 
+(Y (\isGreaterEqual x y .
+  (isEqual x y)
+  true
+  (
+    (is0 x)
+    false
+    (isGreaterEqual (pred x) (pred y))
+  )
+))
+
+-- isDivisor: (x / y) es entero?
+def isDivisor = 
+(\x y.
+  (Y (\isDivisorAux i x y.  
+    (
+      (isGreaterEqual (mult i y) x)
+      (isEqual (mult i y) x)
+      (isDivisorAux (suc i) x y)
+    )
+  )) 
+  1 -- Empiezo a chequear si es (i*y == x) con i = 1
+  x 
+  y
+)
+
+-- isPrimo: no tiene divisores que no son el numero y uno?
+def isPrimo =
+(\x. 
+  (isEqual x 1)
+  true
+  (
+    (Y (\isPrimoAux i x. 
+      (isDivisor x i)
+      (isEqual x i)
+      (isPrimoAux (suc i) x)
+    )) 
+    2 -- Empiezo a chequar si es divisor con 2
+    x
+  )
+)
+
+def assert = (\x. x true undefined)
+
+def test0 = 
+(
+  and 
+  (
+    and 
+    (assert (isEqual 0 0))
+    (assert (isEqual 2 2))
+  )
+  (
+    and 
+    (assert (not (isEqual 5 3)))
+    (assert (not (isEqual 3 5)))
+  )
+)
+
+def test1 = 
+(
+  and 
+  (
+    and 
+    (assert (isPrimo 1))
+    (assert (isPrimo 2))
+  )
+  (
+    and 
+    (assert (not (isPrimo 4)))
+    (assert (not (isPrimo 10)))
+  )
+)
+
